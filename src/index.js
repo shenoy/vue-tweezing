@@ -173,3 +173,26 @@ export function tweenjsHelper (TWEEN) {
       .start()
   }
 }
+
+export function d3Helper ({ timer, interpolate, easing }) {
+  return function (value, end, opts) {
+    const interpolator = interpolate(value, end)
+    const duration = +opts.duration || 1000
+    let started = false
+    const t = timer(elapsed => {
+      if (elapsed > duration) {
+        t.stop()
+        opts.$setValue(end)
+        this.$emit('end')
+        return
+      }
+      if (!started) {
+        this.$emit('start')
+        started = true
+      }
+      let nextValue = interpolator(easing(elapsed / duration))
+      opts.$setValue(nextValue)
+    }, +opts.delay || 0)
+    return t
+  }
+}
